@@ -1,0 +1,69 @@
+##
+#线性回归 公式 的实现
+from numpy import *
+import matplotlib.pylab as plt
+
+def loadDataSet(file_name):
+    '''
+    Desc: 
+        加载并解析数据
+    Args:
+        file_name -- 文件名称，要解析的文件所在磁盘位置
+    Returns:
+        dataMat -- 原始数据的特征
+        labelMat -- 原始数据的标签，也就是每条样本对应的类别
+    '''
+    # dataMat为原始数据， labelMat为原始数据的标签
+    dataMat = []; labelMat = []
+    fr = open(file_name)
+    for line in fr.readlines():
+        print ('line:',line)
+        lineArr = line.strip().split()
+        # 为了方便计算，我们将 X0 的值设为 1.0 ，也就是在每一行的开头添加一个 1.0 作为 X0
+        dataMat.append( float(lineArr[0]))
+        labelMat.append(float(lineArr[1]))
+    return dataMat,labelMat
+    
+    def standRegres(xArr,yArr):
+    '''
+    Description：
+        线性回归
+    Args:
+        xArr ：输入的样本数据，包含每个样本数据的 feature
+        yArr ：对应于输入数据的类别标签，也就是每个样本对应的目标变量
+    Returns:
+        ws：回归系数
+    '''
+
+    # mat()函数将xArr，yArr转换为矩阵 mat().T 代表的是对矩阵进行转置操作
+    xMat = mat(xArr)
+    yMat = mat(yArr)
+    # 矩阵乘法的条件是左矩阵的列数等于右矩阵的行数
+    xTx = xMat.T*xMat
+    # 因为要用到xTx的逆矩阵，所以事先需要确定计算得到的xTx是否可逆，条件是矩阵的行列式不为0
+    # linalg.det() 函数是用来求得矩阵的行列式的，如果矩阵的行列式为0，则这个矩阵是不可逆的，就无法进行接下来的运算                   
+    if linalg.det(xTx) == 0.0:
+        print("This matrix is singular, cannot do inverse" )
+        return
+    # 最小二乘法
+    # http://www.apache.wiki/pages/viewpage.action?pageId=5505133
+    # 书中的公式，求得w的最优解
+    ws = xTx.I * (xMat.T*yMat)            
+    return ws
+    
+    def regression1():
+    xArr, yArr = loadDataSet("testData.txt")
+    xMat = mat(xArr)
+    yMat = mat(yArr).T
+    ws = standRegres(xArr, yArr)
+    fig = plt.figure()
+    ax = fig.add_subplot(111)               # add_subplot(349)函数的参数的意思是，将画布分成3行4列图像画在从左到右从上到下第9块
+    ax.scatter([xMat[:, 1].flatten()], [yMat.T[:, 0].flatten().A[0]]) # scatter 的x是xMat中的第二列，y是yMat的第一列
+    xCopy = xMat.copy()
+    xCopy.sort(0)
+    yHat = xCopy * ws
+#     ax.plot(xCopy[:, 1], yHat)
+    ax.plot(xCopy, yHat)
+    plt.show()
+regression1()
+
