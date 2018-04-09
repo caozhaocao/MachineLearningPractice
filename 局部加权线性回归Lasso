@@ -1,0 +1,89 @@
+#局部加权线性回归Lasso
+#
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+#解析数据
+def loadDataSet(file_name):
+    '''
+    Desc: 
+        加载并解析数据
+    Args:
+        file_name -- 文件名称，要解析的文件所在磁盘位置
+    Returns:
+        dataMat -- 原始数据的特征
+        labelMat -- 原始数据的标签，也就是每条样本对应的类别
+    '''
+    # dataMat为原始数据， labelMat为原始数据的标签
+    dataMat = []; labelMat = []
+    with open(file_name) as  fr:
+        for line in fr.readlines():
+            print ('line:',line)
+            lineArr = line.strip().split()
+            # 为了方便计算，我们将 X0 的值设为 1.0 ，也就是在每一行的开头添加一个 1.0 作为 X0
+            dataMat.append( [float(lineArr[6])])#,[float(lineArr[1])],[float(lineArr[2])],[float(lineArr[3])],[float(lineArr[4])],
+                          #[float(lineArr[5])],[float(lineArr[6])]])
+            labelMat.append( [float(lineArr[7])])
+    return dataMat,labelMat
+
+print(loadDataSet('abaloneFish.txt'))#数据需要保存 ，才有效
+# loadDataSet('abaloneFish.txt')
+
+##岭回归 防止X.T * X 没有逆矩阵 所有加个 权重r*W ---当X.T * X 有逆矩阵时，r=0
+#Q(a)=(X.T *X +a * I)(-1)*X.T* y
+#岭回归 原始代码
+def ridgeRegres(xMat,yMat,lam=0.2):
+    
+    xTx=xMat.T * xMat
+    
+    eye=np.array([[1,0,0,1],[0,1,1,0],[0,1,1,0],[1,0,0,1]])
+    print (eye[1])
+    #岭回归就是矩阵xTx上加上一个rI从而使得矩阵非奇异，进而对xTx+rI求逆矩阵
+    denom=xTx +eye[len(xMat[1])]*lam
+    
+    ws=denom.I * (xMat.T * yMat)
+    return ws
+
+DataMat,LabelMat=loadDataSet('abaloneFish.txt')
+DataMat=np.mat(DataMat)
+LabelMat=np.mat(LabelMat)
+ridgeRegres(DataMat,LabelMat)
+
+##
+def ridgeTest(xArr,yArr):
+#     print ('yArr:',yArr)
+#     print ('yArr.T:',yArr.T)
+    xMat=np.mat(xArr)
+    yMat=np.mat(yArr)
+    print ('yArr:',yArr)
+    #计算平均值
+    yMean=np.mean(yMat,0)
+    print ('yMean:',yMean)
+    
+#     yMean=np.mean(yMat.T,0)
+#     print ('yMean.T:',yMean)
+    # Y的所有的特征减去平均值
+    yMat=yMat-yMean
+    #标准化x，计算xMat平均值
+    xMeans=np.mean(xMat,0)
+    print ('xMeans',xMeans)
+    #然后计算X的方差
+    xVar=np.var(xMat,0)
+    #所有特征都减去各自的平均值 并 除以方差
+    xMat=(xMat-xMeans)/xVar
+    #可以在30个不同的lambda下调用ridgeRegres()函数
+    numTestPts=30
+    #创建30*m 的全部数据为0的矩阵
+    wMat=np.zeros((numTestPts,len(xMat)))
+#     print ('xMat:',xMat)
+#     print('yMat:',yMat)
+    for i in range(numTestPts):
+        ws=ridgeRegres(xMat,yMat,math.exp(i-10))
+        wMat[i,:]=ws.T
+    return wMat
+
+value=ridgeTest(DataMat,LabelMat)
+
+plt.plot(value)
+plt.show()
