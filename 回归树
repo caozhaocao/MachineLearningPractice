@@ -1,0 +1,60 @@
+#Apache分类回归树--测试数据的效果图
+import numpy as np
+import matplotlib.pyplot as plt
+
+#读取数据 数据为字符串数据，显示图需要转化为float
+def loadDataSet(fileName):
+    listX=[]
+    listY=[]
+    with open(fileName) as fileDoc:
+        chooseNum=0
+        for lines in fileDoc.readlines():
+            for line in lines.strip().split():
+                if chooseNum==0:
+                    listX.append(line)
+                    chooseNum=1
+                else:
+                    listY.append(line)
+                    chooseNum=0
+    return listX,listY
+# loadDataSet('classificationData.txt')
+
+listX,listY=loadDataSet('classificationData.txt')
+#print listX
+#print listY
+
+#显示问题，字符串数据 转化为 float数据
+plt.scatter(listX,listY,marker='o')
+# plt.xticks(range(1,30),rotation=1)
+plt.show()
+
+#读取数据 数据为字符串数据，显示图需要转化为float
+def loadDataSet(fileName):
+    listX=[]
+    listY=[]
+    with open(fileName) as fileDoc:
+        chooseNum=0
+        for lines in fileDoc.readlines():
+            for line in lines.strip().split():
+                if chooseNum==0:
+                    listX.append(float(line))
+                    chooseNum=1
+                else:
+                    listY.append(float(line))
+                    chooseNum=0
+    return listX,listY
+    
+    #分类数据
+listX,listY=loadDataSet('classificationData.txt')
+print type(listX[0])
+print listX
+
+plt.plot(listX,listY,'o')
+plt.show()
+
+#回归数据
+listX,listY=loadDataSet('LogressData.txt')
+print type(listX[0])
+
+plt.plot(listX,listY,'o')
+plt.show()
