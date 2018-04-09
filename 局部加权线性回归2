@@ -1,0 +1,90 @@
+#局部加权线性回归2
+##
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+#
+#解析数据
+def loadDataSet(file_name):
+    '''
+    Desc: 
+        加载并解析数据
+    Args:
+        file_name -- 文件名称，要解析的文件所在磁盘位置
+    Returns:
+        dataMat -- 原始数据的特征
+        labelMat -- 原始数据的标签，也就是每条样本对应的类别
+    '''
+    # dataMat为原始数据， labelMat为原始数据的标签
+    dataMat = []; labelMat = []
+    fr = open(file_name)
+    for line in fr.readlines():
+        print ('line:',line)
+        lineArr = line.strip().split()
+        # 为了方便计算，我们将 X0 的值设为 1.0 ，也就是在每一行的开头添加一个 1.0 作为 X0
+        dataMat.append( [float(lineArr[0])])
+        labelMat.append( [float(lineArr[1])])
+    return dataMat,labelMat
+    
+    ## 测试数据
+print (loadDataSet('LocalWeighLinearRegres.txt'))
+dataMat,labelMat=loadDataSet('LocalWeighLinearRegres.txt')
+print (dataMat)
+
+def lwlr(testPoint,xArr,yArr,k=1.0):
+    xMat=np.mat(dataMat)
+    yMat=np.mat(labelMat)
+    print (xMat)
+    print('xMat[:2,]:',xMat[:2,])
+    print('xMat[2,]:',xMat[2,])
+    #获得xMat矩阵的行数
+    m=len(xMat)
+#     m2=len(xMat[0])
+#     print ('xMat[0]:',xMat[0])
+#     print ('yMat:',yMat)
+#     print ('yMat[0]:',yMat[0])
+#     print ('yMat[0][0]:',yMat[0][0])
+#     print ('lenyMat[0]:',len(yMat[0]))
+#     n=len(yMat)
+    print (m)#,m2,n)
+    weights=np.array([[1,0,0,1],[0,1,1,0],[0,1,1,0],[1,0,0,1]])
+#     print ('weights[0][0]:',weights[0][0])
+#     print ('weights[0,0]:',weights[0,0])
+#     print ('weights[1,1]:',weights[1,1])
+    print (weights)
+    for j in range(m):
+        #testPoint的形式是一个行向量的形式
+        #计算testPoint与输入样本点之间的距离，然后下面计算每个样本贡献误差的权值
+        diffMat=testPoint-xMat[j,:]
+        #k控制衰减的速度
+        weights[j,j]=math.exp(diffMat*diffMat.T/(-2.0 * k**2))
+        print ('j:',j)
+        print ('weights[j,j]:',weights[j,j])
+        #根据矩阵乘法计算xTx，其中的weights矩阵是样本点对应的权重矩阵
+        xTx=xMat.T * (weights * xMat)
+        
+        #计算回归系数的一个估计
+        ws=xTx.I * (xMat.T * (weights * yMat))
+        print ('ws:',ws)
+        print ('testPoint * ws:',testPoint * ws)
+        return testPoint *ws
+    
+lwlr(dataMat[0],0,0)
+
+
+def lwlrTest(testArr,xArr,yArr,k=1.0):
+    m=len(testArr)#得到样本总数
+    #构建一个全部是0的1*m的矩阵
+    yHat=np.zeros(m)
+    #循环所有的数据点，并将lwlr运用于所有的数据点
+    for i in range(m):
+        yHat[i]=lwlr(testArr[i],xArr,yArr,k)
+        #返回估计值
+    return yHat
+
+#dataMat,labelMat
+lwlrTest(dataMat,dataMat,labelMat,0.01)
+
+plt.plot(dataMat,labelMat,'o')
+plt.show()
