@@ -1,0 +1,88 @@
+##局部加权线性回归Lasso
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+#解析数据
+def loadDataSet(file_name):
+    '''
+    Desc: 
+        加载并解析数据
+    Args:
+        file_name -- 文件名称，要解析的文件所在磁盘位置
+    Returns:
+        dataMat -- 原始数据的特征
+        labelMat -- 原始数据的标签，也就是每条样本对应的类别
+    '''
+    # dataMat为原始数据， labelMat为原始数据的标签
+    dataMat = []; labelMat = []
+    with open(file_name) as  fr:
+        for line in fr.readlines():
+            print ('line:',line)
+            lineArr = line.strip().split()
+            # 为了方便计算，我们将 X0 的值设为 1.0 ，也就是在每一行的开头添加一个 1.0 作为 X0
+            dataMat.append( [float(lineArr[6])])#,[float(lineArr[1])],[float(lineArr[2])],[float(lineArr[3])],[float(lineArr[4])],
+                          #[float(lineArr[5])],[float(lineArr[6])]])
+            labelMat.append( [float(lineArr[7])])
+    return dataMat,labelMat
+    
+    def regularize(xMat):
+      #'''数据标准化函数'''
+    inMat = xMat.copy()
+    inMeans = np.mean(inMat,0)
+    inVar = np.var(inMat,0)
+    inMat = (inMat - inMeans)/inVar
+    return inMat
+    
+     def rssError(yArr,yHatArr): 
+    #'''计算均方误差大小'''
+    return ((yArr-yHatArr)**2).sum()
+    
+    #
+#lasso  w(2)<=r
+#促进修改w的过程
+def stageWise(xArr,yArr,eps=0.01,numIt=100):#修改完 需要保存 不然不会执行 修改的文件代码
+    xMat=np.mat(xArr)
+    yMat=np.mat(yArr).T
+    yMean=np.mean(yMat,0)
+    yMat=yMat-yMean
+    print ('xMat:',xMat)
+    xMat=regularize(xMat)
+    print ('xMat:',xMat)
+    print ('lenxMat:',len(xMat))
+    n=len(xMat)
+    m=n
+    ws=np.zeros((n,1))
+    wsTest=ws.copy()
+    wsMax=ws.copy()
+    returnMat=np.zeros((numIt,n))
+    for i in range(numIt):
+        print ws.T
+        lowestError=np.inf
+        for j in range(n):
+            for sign in [-1,1]:
+                wsTest=ws.copy()
+                wsTest[j]+=eps * sign
+                yTest=xMat * wsTest.T
+                rssE=rssError(yMat.A,yTest.A)
+                if rssE<lowestError:
+                    lowestError=rssE
+                    wsMax=wsTest
+        ws=wsMax.copy()
+        returnMat[i,:]=ws.T
+    return returnMat
+    
+    
+    def regression4():
+    xArr,yArr=loadDataSet('abaloneFish.txt')
+    stageWise(xArr,yArr,0.01,200)
+    xMat=np.mat(xArr)
+    yMat=np.mat(yArr)
+    xMat=regularize(xMat)
+    yM=np.mean(yMat,0)
+    yMat=yMat-yM
+    weights=standRegres(xMat,yMat)
+    print (weights)
+    
+# print 'weights:',regression4()
+print 'weights1:',regression4()
